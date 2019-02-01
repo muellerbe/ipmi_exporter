@@ -2,9 +2,11 @@ credentials:
         default:
                 user: "default_user"
                 pass: "example_pw"
+                priv: "example_priv"
         10.8.0.2:
                 user: "host_specific_user"
                 pass: "another_pw"
+                priv: "another_priv"
 
 exclude_sensor_ids:
   - 2

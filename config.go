@@ -29,8 +29,9 @@ type SafeConfig struct {
 // Credentials is the Go representation of the credentials section in the yaml
 // config file.
 type Credentials struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"pass"`
+	User      string `yaml:"user"`
+	Password  string `yaml:"pass"`
+	Privilege string `yaml:"priv"`
 
 	// Catches all undefined fields and must be empty after parsing.
 	XXX map[string]interface{} `yaml:",inline"`
@@ -102,14 +103,16 @@ func (sc *SafeConfig) CredentialsForTarget(target string) (Credentials, error) {
 	defer sc.Unlock()
 	if credentials, ok := sc.C.Credentials[target]; ok {
 		return Credentials{
-			User:     credentials.User,
-			Password: credentials.Password,
+			User:      credentials.User,
+			Password:  credentials.Password,
+			Privilege: credentials.Privilege,
 		}, nil
 	}
 	if credentials, ok := sc.C.Credentials["default"]; ok {
 		return Credentials{
-			User:     credentials.User,
-			Password: credentials.Password,
+			User:      credentials.User,
+			Password:  credentials.Password,
+			Privilege: credentials.Privilege,
 		}, nil
 	}
 	return Credentials{}, fmt.Errorf("no credentials found for target %s", target)

@@ -51,6 +51,7 @@ type rmcpConfig struct {
 	host string
 	user string
 	pass string
+	priv string
 }
 
 var (
@@ -173,17 +174,17 @@ func pipeName() string {
 	return filepath.Join(os.TempDir(), "ipmi_exporter-"+hex.EncodeToString(randBytes))
 }
 
-func freeipmiConfig(driver, user, password string) string {
+func freeipmiConfig(driver, priv, user, password string) string {
 	return fmt.Sprintf(`
 driver-type %s
-privilege-level admin
+privilege-level %s
 username %s
 password %s
-	`, driver, user, password)
+	`, driver, priv, user, password)
 }
 
-func freeipmiConfigPipe(driver, user, password string) (string, error) {
-	content := []byte(freeipmiConfig(driver, user, password))
+func freeipmiConfigPipe(driver, priv, user, password string) (string, error) {
+	content := []byte(freeipmiConfig(driver, priv, user, password))
 	pipe := pipeName()
 	err := syscall.Mkfifo(pipe, 0600)
 	if err != nil {
@@ -207,7 +208,7 @@ func freeipmiOutput(cmd string, rmcp *rmcpConfig, arg ...string) ([]byte, error)
 	args := []string{}
 
 	if rmcp != nil {
-		pipe, err := freeipmiConfigPipe("LAN_2_0", rmcp.user, rmcp.pass)
+		pipe, err := freeipmiConfigPipe("LAN_2_0", rmcp.priv, rmcp.user, rmcp.pass)
 		if err != nil {
 			return nil, err
 		}
@@ -503,6 +504,7 @@ func (c collector) Collect(ch chan<- prometheus.Metric) {
 			host: c.target,
 			user: creds.User,
 			pass: creds.Password,
+			priv: creds.Privilege,
 		}
 	}
 
